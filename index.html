@@ -120,6 +120,159 @@
       .wish-card:hover::before {
         left: 100%;
       }
+
+      /* Play Game css  */
+      .game-button {
+        display: block;
+        margin: 3rem auto;
+        padding: 1.2rem 2.5rem;
+        font-size: 1.5rem;
+        font-family: "Poppins", sans-serif;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .game-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      .game-button:hover::before {
+        left: 100%;
+      }
+
+      .game-button:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .games-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(26, 26, 46, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .games-content {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2.5rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .games-title {
+        font-family: "Satisfy", cursive;
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      .game-option {
+        display: block;
+        margin: 1.2rem 0;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .game-option::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      .game-option:hover::before {
+        left: 100%;
+      }
+
+      .game-option:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2rem;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+      }
+
+      .close-modal:hover {
+        transform: rotate(90deg);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .games-title {
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+      }
     </style>
   </head>
   <body>
@@ -127,6 +280,19 @@
       <h1 class="title">Happy Birthday Fatima! ✨</h1>
 
       <div class="wish-board" id="wishBoard"></div>
+      <button class="game-button">🎮 Play Birthday Games! 🎮</button>
+
+      <div class="games-modal" id="gamesModal">
+        <div class="close-modal" id="closeModal">×</div>
+        <div class="games-content">
+          <h2 class="games-title">Choose a Game! 🎲</h2>
+          <a href="#" class="game-option">🎈 Pop the Balloons</a>
+          <a href="#" class="game-option">🎂 Catch the Cake</a>
+          <a href="#" class="game-option">🎭 Memory Match</a>
+          <a href="#" class="game-option">🎯 Birthday Pinata</a>
+          <a href="#" class="game-option">🏃‍♂️ Present Chase</a>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -172,7 +338,7 @@
 
           card.innerHTML = `
                     <div class="wish-text">${wish.message}</div>
-                    <div class="sender-name">From: ${wish.sender}</div>
+                    <div class="sender-name">${wish.sender}</div>
                 `;
 
           wishBoard.appendChild(card);
@@ -180,6 +346,29 @@
       }
 
       document.addEventListener("DOMContentLoaded", createWishCards);
+
+      // Play a game Js
+      document.querySelector(".game-button").addEventListener("click", () => {
+        document.getElementById("gamesModal").style.display = "flex";
+      });
+
+      document.getElementById("closeModal").addEventListener("click", () => {
+        document.getElementById("gamesModal").style.display = "none";
+      });
+
+      // Close modal when clicking outside
+      document.getElementById("gamesModal").addEventListener("click", (e) => {
+        if (e.target === document.getElementById("gamesModal")) {
+          document.getElementById("gamesModal").style.display = "none";
+        }
+      });
+
+      // Prevent closing when clicking inside modal content
+      document
+        .querySelector(".games-content")
+        .addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
     </script>
   </body>
 </html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catch the Cake! 🎂</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Satisfy&display=swap");
+
+      body {
+        margin: 0;
+        height: 100vh;
+        background: #1a1a2e;
+        background-image: radial-gradient(
+            circle at 25% 25%,
+            rgba(255, 182, 193, 0.2) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 75% 75%,
+            rgba(147, 112, 219, 0.2) 0%,
+            transparent 40%
+          );
+        font-family: "Poppins", sans-serif;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .game-title {
+        font-family: "Satisfy", cursive;
+        font-size: 2em;
+        margin: 10px 0;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      .instructions {
+        font-size: 1em;
+        margin: 5px 0;
+        color: #fff;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 5px 15px;
+        border-radius: 10px;
+      }
+
+      .key {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 5px;
+        margin: 0 3px;
+      }
+
+      #gameCanvas {
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      .score-board {
+        font-size: 1.2em;
+        margin: 10px 0;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+
+      .game-over {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .button-container {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .restart-btn,
+      .back-btn {
+        padding: 10px 20px;
+        font-size: 1.2em;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: transform 0.3s ease;
+      }
+
+      .restart-btn:hover,
+      .back-btn:hover {
+        transform: scale(1.1);
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+        }
+        50% {
+          filter: drop-shadow(0 0 20px rgba(147, 112, 219, 0.5));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="game-title">Catch the Cake! 🎂</h1>
+    <div class="instructions">
+      Press <span class="key">←</span> and <span class="key">→</span> to move
+    </div>
+    <div class="score-board">Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="game-over" id="gameOver">
+      <h2>Game Over!</h2>
+      <p>Final Score: <span id="finalScore">0</span></p>
+      <div class="button-container">
+        <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        <button class="back-btn" onclick="goBack()">Go Back</button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const scoreElement = document.getElementById("score");
+      const gameOverElement = document.getElementById("gameOver");
+      const finalScoreElement = document.getElementById("finalScore");
+
+      function resizeCanvas() {
+        const maxHeight = window.innerHeight - 150;
+        const maxWidth = window.innerWidth - 40;
+
+        const aspectRatio = 2 / 3;
+
+        if (maxHeight * (2 / 3) <= maxWidth) {
+          canvas.height = maxHeight;
+          canvas.width = maxHeight * (2 / 3);
+        } else {
+          canvas.width = maxWidth;
+          canvas.height = maxWidth * (3 / 2);
+        }
+
+        plate.y = canvas.height - 60;
+        plate.x = canvas.width / 2 - plate.width / 2;
+      }
+
+      const plate = {
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 20,
+        speed: 8,
+      };
+
+      let cakes = [];
+      let bombs = [];
+      let score = 0;
+      let gameActive = true;
+      let keys = {};
+
+      class FallingObject {
+        constructor(type) {
+          this.width = 30;
+          this.height = 30;
+          this.x = Math.random() * (canvas.width - this.width);
+          this.y = -this.height;
+          this.speed = 3 + Math.random() * 2;
+          this.type = type;
+        }
+
+        update() {
+          this.y += this.speed;
+        }
+
+        draw() {
+          ctx.font = "30px Arial";
+          ctx.fillText(this.type === "cake" ? "🎂" : "💣", this.x, this.y);
+        }
+      }
+
+      function createObject() {
+        if (Math.random() < 0.7) {
+          cakes.push(new FallingObject("cake"));
+        } else {
+          bombs.push(new FallingObject("bomb"));
+        }
+      }
+
+      function drawPlate() {
+        ctx.fillStyle = "#ff69b4";
+        ctx.beginPath();
+        ctx.ellipse(
+          plate.x + plate.width / 2,
+          plate.y + plate.height / 2,
+          plate.width / 2,
+          plate.height / 2,
+          0,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      function checkCollision(object) {
+        return (
+          object.y + object.height > plate.y &&
+          object.y < plate.y + plate.height &&
+          object.x + object.width > plate.x &&
+          object.x < plate.x + plate.width
+        );
+      }
+
+      function gameOver() {
+        gameActive = false;
+        gameOverElement.style.display = "block";
+        finalScoreElement.textContent = score;
+      }
+
+      function restartGame() {
+        gameActive = true;
+        score = 0;
+        scoreElement.textContent = score;
+        cakes = [];
+        bombs = [];
+        gameOverElement.style.display = "none";
+        animate();
+      }
+
+      function goBack() {
+        window.history.back();
+      }
+
+      function update() {
+        if (keys.ArrowLeft && plate.x > 0) {
+          plate.x -= plate.speed;
+        }
+        if (keys.ArrowRight && plate.x < canvas.width - plate.width) {
+          plate.x += plate.speed;
+        }
+
+        cakes = cakes.filter((cake) => {
+          if (checkCollision(cake)) {
+            score += 10;
+            scoreElement.textContent = score;
+            return false;
+          }
+          return cake.y < canvas.height;
+        });
+
+        bombs = bombs.filter((bomb) => {
+          if (checkCollision(bomb)) {
+            gameOver();
+            return false;
+          }
+          return bomb.y < canvas.height;
+        });
+
+        cakes.forEach((cake) => cake.update());
+        bombs.forEach((bomb) => bomb.update());
+
+        if (Math.random() < 0.02) {
+          createObject();
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPlate();
+        cakes.forEach((cake) => cake.draw());
+        bombs.forEach((bomb) => bomb.draw());
+      }
+
+      function animate() {
+        if (!gameActive) return;
+        update();
+        draw();
+        requestAnimationFrame(animate);
+      }
+
+      document.addEventListener("keydown", (e) => {
+        keys[e.key] = true;
+      });
+
+      document.addEventListener("keyup", (e) => {
+        keys[e.key] = false;
+      });
+
+      // Touch controls
+      let touchStartX = null;
+      canvas.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
+      });
+
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (touchStartX === null) return;
+
+        const touch = e.touches[0];
+        const diff = touch.clientX - touchStartX;
+        plate.x = Math.max(
+          0,
+          Math.min(canvas.width - plate.width, plate.x + diff)
+        );
+        touchStartX = touch.clientX;
+      });
+
+      // Add resize listener
+      window.addEventListener("resize", resizeCanvas);
+
+      // Initial setup
+      resizeCanvas();
+      animate();
+    </script>
+  </body>
+</html>

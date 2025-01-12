@@ -35,11 +35,14 @@
         text-align: center;
         font-family: "Satisfy", cursive;
         font-size: 3em;
-        margin-bottom: 2rem;
+        position: fixed; /* Change to fixed */
+        top: 20px; /* Add this */
+        left: 50%; /* Add this */
+        transform: translateX(-50%); /* Add this */
         background: linear-gradient(45deg, #ff69b4, #9370db);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: glow 2s ease-in-out infinite;
+        z-index: 2;
       }
 
       .pinata-container {
@@ -198,6 +201,61 @@
         text-align: center;
         color: rgba(255, 255, 255, 0.7);
       }
+
+      /* final message */
+      .final-message {
+        font-family: "Satisfy", cursive;
+        font-size: 4em;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: absolute;
+        top: 40%; /* Adjust this value */
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.5s;
+        z-index: 3;
+        text-align: center;
+        white-space: nowrap;
+        user-select: none;
+        pointer-events: none;
+      }
+
+      .replay-buttons {
+        position: fixed;
+        top: 70%; /* Adjust this value */
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        gap: 1rem;
+        opacity: 0;
+        transition: opacity 0.5s;
+        z-index: 4;
+        pointer-events: none;
+      }
+      .replay-buttons.visible {
+        pointer-events: all;
+      }
+
+      .replay-button {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(5px);
+        color: white;
+        font-family: "Poppins", sans-serif;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .replay-button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.05);
+      }
     </style>
   </head>
   <body>
@@ -207,10 +265,20 @@
       <div class="pinata" id="pinata">🪅</div>
     </div>
     <div class="messages-container" id="messagesContainer"></div>
+    <div class="final-message" id="finalMessage">Happy Birthday Fatima! 🎉</div>
+    <div class="replay-buttons" id="replayButtons">
+      <button class="replay-button" onclick="location.reload()">
+        Play Again
+      </button>
+      <button class="replay-button" onclick="window.location.href='index.html'">
+        Home
+      </button>
+    </div>
     <div class="click-counter">Hits remaining: <span id="clicks">10</span></div>
     <div class="instruction">Click the pinata to break it open!</div>
 
     <script>
+      let gameEnded = false;
       const messages = [
         "Your smile lights up the room! 🌟",
         "Wishing you endless joy! 🎈",
@@ -281,6 +349,9 @@
       }
 
       pinata.addEventListener("click", () => {
+        // Check if game has already ended
+        if (gameEnded) return;
+
         clicksLeft--;
         clickCounter.textContent = clicksLeft;
 
@@ -294,13 +365,26 @@
         showMessage();
 
         if (clicksLeft <= 0) {
-          // Final burst
+          gameEnded = true;
           pinata.style.transform = "scale(2)";
           pinata.style.opacity = "0";
+          document.querySelector(".rope").style.display = "none"; // Add this line
           setTimeout(() => {
-            pinata.textContent = "🎊";
+            pinata.style.display = "none";
             pinata.style.transform = "scale(1.5)";
             pinata.style.opacity = "1";
+
+            // Show Happy Birthday message
+            const finalMessage = document.getElementById("finalMessage");
+            finalMessage.style.opacity = "1";
+
+            // Show replay buttons
+            const replayButtons = document.getElementById("replayButtons");
+            replayButtons.style.opacity = "1";
+            replayButtons.classList.add("visible");
+
+            // Hide instruction text
+            document.querySelector(".instruction").style.opacity = "0";
 
             // Multiple confetti bursts
             for (let i = 0; i < 8; i++) {

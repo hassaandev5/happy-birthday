@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Present Chase</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Satisfy&display=swap");
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #1a1a2e;
+        background-image: radial-gradient(
+            circle at 25% 25%,
+            rgba(255, 182, 193, 0.2) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 75% 75%,
+            rgba(147, 112, 219, 0.2) 0%,
+            transparent 40%
+          );
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #fff;
+        overflow: hidden;
+      }
+
+      #gameContainer {
+        position: relative;
+        width: 800px;
+        height: 300px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      #player {
+        position: absolute;
+        bottom: 0;
+        left: 50px;
+        width: 40px;
+        height: 40px;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="20" font-size="20">🏃‍♂️</text></svg>');
+        background-size: contain;
+        transform: scaleX(-1); /* This flips the emoji horizontally */
+      }
+
+      .present {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="20" font-size="20">🎁</text></svg>');
+        background-size: contain;
+      }
+
+      .obstacle {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="20" font-size="20">🪨</text></svg>');
+        background-size: contain;
+      }
+
+      #ground {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      #score {
+        font-size: 24px;
+        margin: 20px;
+        color: #fff;
+        text-align: center;
+      }
+
+      #gameOver {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        z-index: 100;
+      }
+
+      .button-container {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      #instructions {
+        margin: 20px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="score">Score: 0</div>
+    <div id="gameContainer">
+      <div id="player"></div>
+      <div id="ground"></div>
+      <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <div class="button-container">
+          <button onclick="restartGame()">Play Again</button>
+          <button onclick="window.location.href='index.html'">Go Home</button>
+        </div>
+      </div>
+    </div>
+    <div id="instructions">
+      Press SPACE or tap to jump<br />
+      Collect presents and avoid obstacles!
+    </div>
+
+    <script>
+      const player = document.getElementById("player");
+      const gameContainer = document.getElementById("gameContainer");
+      const scoreElement = document.getElementById("score");
+      const gameOverElement = document.getElementById("gameOver");
+      const finalScoreElement = document.getElementById("finalScore");
+
+      let score = 0;
+      let gameSpeed = 5;
+      let gameActive = true;
+      let isJumping = false;
+      let gravity = 0.9;
+      let jumpForce = 0;
+      let gameObjects = [];
+      let playerBottom = 0;
+      let spawnInterval;
+
+      function jump() {
+        if (!isJumping && gameActive) {
+          isJumping = true;
+          jumpForce = 15;
+        }
+      }
+
+      function createObject() {
+        if (!gameActive) return;
+
+        const isPresent = Math.random() > 0.5;
+        const object = document.createElement("div");
+        object.className = isPresent ? "present" : "obstacle";
+        object.style.left = gameContainer.offsetWidth + "px";
+        object.style.bottom = "0px";
+        gameContainer.appendChild(object);
+        gameObjects.push({ element: object, isPresent });
+      }
+
+      function updateGame() {
+        if (!gameActive) return;
+
+        // Update player jump
+        if (isJumping) {
+          playerBottom += jumpForce;
+          jumpForce -= gravity;
+
+          if (playerBottom <= 0) {
+            playerBottom = 0;
+            isJumping = false;
+            jumpForce = 0;
+          }
+
+          player.style.bottom = playerBottom + "px";
+        }
+
+        // Update objects
+        gameObjects.forEach((object, index) => {
+          const objectLeft = parseFloat(object.element.style.left);
+          object.element.style.left = objectLeft - gameSpeed + "px";
+
+          // Check collision
+          if (checkCollision(object.element, player)) {
+            if (object.isPresent) {
+              score += 10;
+              scoreElement.textContent = `Score: ${score}`;
+              gameContainer.removeChild(object.element);
+              gameObjects.splice(index, 1);
+            } else {
+              endGame();
+            }
+          }
+
+          // Remove if passed left edge
+          if (objectLeft < -50) {
+            gameContainer.removeChild(object.element);
+            gameObjects.splice(index, 1);
+          }
+        });
+
+        // Increase game speed gradually
+        gameSpeed += 0.001;
+
+        requestAnimationFrame(updateGame);
+      }
+
+      function checkCollision(element1, element2) {
+        const rect1 = element1.getBoundingClientRect();
+        const rect2 = element2.getBoundingClientRect();
+
+        return !(
+          rect1.right < rect2.left ||
+          rect1.left > rect2.right ||
+          rect1.bottom < rect2.top ||
+          rect1.top > rect2.bottom
+        );
+      }
+
+      function endGame() {
+        gameActive = false;
+        finalScoreElement.textContent = score;
+        gameOverElement.style.display = "block";
+        clearInterval(spawnInterval);
+      }
+
+      function restartGame() {
+        // Clear all objects
+        gameObjects.forEach((object) =>
+          gameContainer.removeChild(object.element)
+        );
+        gameObjects = [];
+
+        // Reset game state
+        score = 0;
+        gameSpeed = 5;
+        playerBottom = 0;
+        player.style.bottom = "0px";
+        scoreElement.textContent = "Score: 0";
+        gameOverElement.style.display = "none";
+        gameActive = true;
+
+        // Restart spawn interval
+        startGame();
+      }
+
+      function startGame() {
+        updateGame();
+        spawnInterval = setInterval(createObject, 2000);
+      }
+
+      // Event listeners
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          jump();
+        }
+      });
+
+      gameContainer.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        jump();
+      });
+
+      // Start the game
+      startGame();
+    </script>
+  </body>
+</html>

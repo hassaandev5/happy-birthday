@@ -146,6 +146,76 @@
           font-size: 2em;
         }
       }
+
+      /* Result Modal */
+      .results-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(26, 26, 46, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2.5rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        position: relative;
+      }
+
+      .result-message {
+        font-family: "Satisfy", cursive;
+        font-size: 2.5em;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      .result-stats {
+        font-size: 1.2em;
+        margin-bottom: 2rem;
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .modal-button {
+        padding: 0.8rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .modal-button:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .play-again {
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+      }
     </style>
   </head>
   <body>
@@ -157,6 +227,19 @@
       </div>
       <div class="game-board" id="gameBoard"></div>
       <a href="index.html" class="back-to-menu">Back to Birthday Page</a>
+    </div>
+
+    <div class="results-modal" id="resultsModal">
+      <div class="modal-content">
+        <h2 class="result-message">Congratulations! 🎉</h2>
+        <div class="result-stats" id="resultStats"></div>
+        <div class="modal-buttons">
+          <button class="modal-button play-again" onclick="resetGame()">
+            Play Again
+          </button>
+          <a href="index.html" class="modal-button">Go Home</a>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -227,6 +310,50 @@
           flippedCards = [];
         }
         canFlip = true;
+      }
+
+      function checkMatch() {
+        const [card1, card2] = flippedCards;
+        const match = card1.dataset.value === card2.dataset.value;
+
+        if (match) {
+          matchedPairs++;
+          document.getElementById("matches").textContent = matchedPairs;
+          flippedCards = [];
+          if (matchedPairs === emojis.length) {
+            setTimeout(showResults, 500);
+          }
+        } else {
+          card1.classList.remove("flipped");
+          card2.classList.remove("flipped");
+          flippedCards = [];
+        }
+        canFlip = true;
+      }
+
+      function showResults() {
+        const modal = document.getElementById("resultsModal");
+        const stats = document.getElementById("resultStats");
+        stats.textContent = `You completed the game in ${moves} moves!`;
+        modal.style.display = "flex";
+      }
+
+      function resetGame() {
+        // Reset game state
+        flippedCards = [];
+        matchedPairs = 0;
+        moves = 0;
+        canFlip = true;
+
+        // Reset UI
+        document.getElementById("moves").textContent = "0";
+        document.getElementById("matches").textContent = "0";
+        document.getElementById("resultsModal").style.display = "none";
+
+        // Clear and recreate game board
+        const gameBoard = document.getElementById("gameBoard");
+        gameBoard.innerHTML = "";
+        createBoard();
       }
 
       createBoard();

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Birthday Wishes ✨</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Satisfy&display=swap");
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #1a1a2e;
+        background-image: radial-gradient(
+            circle at 25% 25%,
+            rgba(255, 182, 193, 0.2) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 75% 75%,
+            rgba(147, 112, 219, 0.2) 0%,
+            transparent 40%
+          );
+        font-family: "Poppins", sans-serif;
+        color: #fff;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .title {
+        text-align: center;
+        font-family: "Satisfy", cursive;
+        font-size: 4em;
+        margin-bottom: 2rem;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      .wish-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+      }
+
+      .wish-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .wish-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .wish-text {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #fff;
+        margin-bottom: 1rem;
+      }
+
+      .sender-name {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        color: white;
+        border-top-left-radius: 10px;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .wish-card:hover .sender-name {
+        transform: translateY(0);
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+        }
+        50% {
+          filter: drop-shadow(0 0 20px rgba(147, 112, 219, 0.5));
+        }
+      }
+
+      /* Sparkle effect on card hover */
+      .wish-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      .wish-card:hover::before {
+        left: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Happy Birthday Fatima! ✨</h1>
+
+      <div class="wish-board" id="wishBoard"></div>
+    </div>
+
+    <script>
+      const wishes = [
+        {
+          message:
+            "Wishing you a day filled with happiness and a year filled with joy. Happy birthday! May all your dreams come true.",
+          sender: "Emma",
+        },
+        {
+          message:
+            "On your special day, I wish you endless bliss and love. May your birthday be as wonderful as you are!",
+          sender: "James",
+        },
+        {
+          message:
+            "Happy birthday! Here's to another year of laughing together, crying together, and growing together.",
+          sender: "Sophie",
+        },
+        {
+          message:
+            "May this special day bring you endless moments of joy, laughter, and beautiful memories to cherish forever.",
+          sender: "Alex",
+        },
+        {
+          message:
+            "Sending you the warmest wishes on your big day. May it be filled with lots of love and happiness!",
+          sender: "Michael",
+        },
+        {
+          message:
+            "Here's to celebrating you! Wishing you a fantastic birthday and an even better year ahead.",
+          sender: "Lisa",
+        },
+      ];
+
+      function createWishCards() {
+        const wishBoard = document.getElementById("wishBoard");
+
+        wishes.forEach((wish) => {
+          const card = document.createElement("div");
+          card.className = "wish-card";
+
+          card.innerHTML = `
+                    <div class="wish-text">${wish.message}</div>
+                    <div class="sender-name">From: ${wish.sender}</div>
+                `;
+
+          wishBoard.appendChild(card);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", createWishCards);
+    </script>
+  </body>
+</html>

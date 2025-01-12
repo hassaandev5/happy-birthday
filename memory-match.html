@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Birthday Memory Match 🎭</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>"
+    />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Satisfy&display=swap");
 
@@ -215,6 +220,32 @@
 
       .play-again {
         background: linear-gradient(45deg, #ff69b4, #9370db);
+      }
+      /* Custom Scrollbar Styles */
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(26, 26, 46, 0.8);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        border-radius: 10px;
+        border: 2px solid rgba(26, 26, 46, 0.8);
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(45deg, #ff69b4, #9370db);
+        filter: brightness(1.2);
+      }
+
+      /* For Firefox */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #9370db #1a1a2e;
       }
     </style>
   </head>

@@ -64,6 +64,9 @@
         overflow: hidden;
         transition: all 0.3s ease;
         cursor: pointer;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
       }
 
       .wish-card:hover {
@@ -77,6 +80,19 @@
         line-height: 1.6;
         color: #fff;
         margin-bottom: 1rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+      }
+      .read-more {
+        color: #ff69b4;
+        font-size: 0.9rem;
+        margin-top: auto;
+        text-align: left;
+        font-style: italic;
+        padding-bottom: 0.5rem; /* Add space between read-more and sender name */
       }
 
       .sender-name {
@@ -486,9 +502,10 @@
           card.className = "wish-card";
 
           card.innerHTML = `
-                        <div class="wish-text">${wish.message}</div>
-                        <div class="sender-name">${wish.sender}</div>
-                    `;
+            <div class="wish-text">${wish.message}</div>
+            <div class="read-more">Click to see full message...</div>
+            <div class="sender-name">${wish.sender}</div>
+          `;
 
           // Add click event to show message modal
           card.addEventListener("click", () => {
